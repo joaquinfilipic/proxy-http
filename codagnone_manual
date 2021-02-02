@@ -1,0 +1,98 @@
+
+HTTPP(0.0.0)							  HTTPP(0.0.0)
+
+
+
+NAME
+       httpd - proxy HTTP que permite transformar el cuerpo de las respuestas
+
+
+SINOPSIS
+       httpd [ POSIX style options ]
+
+
+OPCIONES
+       -e archivo-de-error
+	      Especifica el archivo donde se redirecciona stderr de las ejecu-
+	      ciones de los filtros. Por defecto el archivo es /dev/null.
+
+
+       -h     Imprime la ayuda y termina.
+
+
+       -l direccion-http
+	      Establece la direccion donde servira el proxy HTTP.  Por defecto
+	      escucha en todas las interfaces.
+
+
+       -L direccion-de-management
+	      Establece  la direccion donde servira el servicio de management.
+	      Por defecto escucha unicamente en loopback.
+
+
+       -M media-types-transformables
+	      Lista de media types transformables. La  sintaxis  de  la  lista
+	      sigue  las  reglas  del header Accept de HTTP (seccion 5.3.2 del
+	      RFC7231	 <https://tools.ietf.org/html/rfc7231#section-5.3.2>).
+	      Por defecto la lista se encuentra vacia.
+
+
+	      Por  ejemplo  el	valor text/plain,image/* transforara todas las
+	      respuestas declaradas como text/plain o de tipo imagen como  ser
+	      image/png.
+
+
+       -o puerto-de-management
+	      Puerto  STCP  donde se encuentra el servidor de management.  Por
+	      defecto el valor es 9090.
+
+
+
+       -p puerto-local
+	      Puerto TCP donde escuchara por conexiones entrantes  HTTP.   Por
+	      defecto el valor es 8080.
+
+
+       -t cmd Comando  utilizado para las transformaciones externas.  Compati-
+	      ble con system(3).  La  seccion  FILTROS	describe  como	es  la
+	      interaccion  entre httpd(8) y el comando filtro.	Por defecto no
+	      se aplica ninguna transformacion.
+
+
+       -v     Imprime informacion sobre la version version y termina.
+
+
+FILTROS
+       Por cada respuesta del origin server de status code 200 que contenga un
+       body (no HEAD) y que tenga un Content-Type compatible con los del pred-
+       icado, se lanza un nuevo proceso que ejecuta el comando externo.  Si el
+       intento	de ejecutar el comando externo falla se debe reportar el error
+       al administrador por los logs, y copiar la entrada  en  la  salida  (es
+       decir no realizar ninguna transformacion).
+
+       El  nuevo  proceso recibe por entrada estandar el contenido del body de
+       la respuesta  (libre de cualquier transfer-encoding), y retorna por  la
+       salida estandar el cuerpo procesado.
+
+       Los  programas  que  realizan las transformaciones externas tienen a su
+       disposicion las siguientes variables de entornos:
+
+
+       HTTPD_VERSION
+	      Version de httpd. Por ejemplo: 0.0.0.
+
+
+EJEMPLOS
+       o   Se desea proxear sin ninguna transformacion:
+		 httpd
+
+
+       o   En Linux es posible redirigir el trafico al proxy de  forma	trans-
+	   parente con una regla que implemente destination NAT:
+		 iptables  -t  nat  -A PREROUTING -i eth0 -p tcp --dport 80 -j
+		 REDIRECT --to 8080
+
+
+
+
+				25 de Mayo 2018 		  HTTPP(0.0.0)
